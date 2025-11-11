@@ -2,6 +2,7 @@ package com.todoapirest.todo_list_api.Service;
 import com.todoapirest.todo_list_api.Entity.Todo;
 import com.todoapirest.todo_list_api.Repository.TodoRepository;
 import com.todoapirest.todo_list_api.TodoDataTransferObject.TodoCreateRequest;
+import com.todoapirest.todo_list_api.TodoDataTransferObject.TodoUpdateRequest;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -29,16 +30,15 @@ public class TodoService {
         }
     }
 
-    public Optional<Todo> updateTodo(Todo todo){
-        return Optional.of(todoRepository.findById(todo.getId())
-                .map(existing -> {
-                    existing.setTitle(todo.getTitle());
-                    existing.setCompleted(todo.getCompleted());
-                    existing.setDescription(todo.getDescription());
-                    existing.setPriority(todo.getPriority());
-                    return todoRepository.save(existing);
-                })
-                .orElseThrow(() -> new EntityNotFoundException("Todo not found: " + todo.getId())));
+    public Optional<Todo> updateTodo(TodoUpdateRequest todo){
+        return todoRepository.findById(todo.id())
+        .map(existing -> {
+            existing.setTitle(todo.title());
+            existing.setCompleted(todo.completed());
+            existing.setDescription(todo.description());
+            existing.setPriority(todo.priority());
+            return todoRepository.save(existing);
+        });
     }
 
     public Optional<Todo> listTodo(Long id){

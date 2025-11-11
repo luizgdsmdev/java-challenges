@@ -30,6 +30,13 @@ public class Todo{
         this.completed = completed;
         this.priority = priority;
     }
+    public Todo(long id, String title, String description, boolean completed, int priority) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.completed = completed;
+        this.priority = priority;
+    }
 
     public Long getId() {
         return id;
