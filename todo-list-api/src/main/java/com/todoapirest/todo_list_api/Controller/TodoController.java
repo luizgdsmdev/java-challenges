@@ -4,7 +4,6 @@ import com.todoapirest.todo_list_api.Entity.Todo;
 import com.todoapirest.todo_list_api.Service.TodoService;
 import com.todoapirest.todo_list_api.TodoDataTransferObject.TodoCreateRequest;
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +18,7 @@ public class TodoController {
     public TodoController(TodoService todoService) {this.todoService = todoService;}
 
     @PostMapping
-    public ResponseEntity<Todo> create(@RequestBody @Valid TodoCreateRequest todoRequest){
+    public ResponseEntity<?> create(@RequestBody @Valid TodoCreateRequest todoRequest){
 
         Todo todoBody = todoService.createTodo(todoRequest);
         URI location = URI.create("/todo/" + todoBody.getId());

@@ -22,7 +22,11 @@ public class TodoService {
         todo.setDescription(todoRequest.description());
         todo.setPriority(todoRequest.priority());
 
-        return todoRepository.save(todo);
+        try {
+            return todoRepository.save(todo);
+        } catch (Exception ex) {
+            throw new RuntimeException("Error for toDo creation on createTodo() method.", ex);
+        }
     }
 
     public Optional<Todo> updateTodo(Todo todo){
