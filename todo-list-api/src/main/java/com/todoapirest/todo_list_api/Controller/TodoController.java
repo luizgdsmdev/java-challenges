@@ -24,7 +24,7 @@ public class TodoController {
             return ResponseEntity.created(location).body((Object) newTodo);
         })
         .orElseGet(() -> ResponseEntity
-        .status(HttpStatus.UNPROCESSABLE_ENTITY)
+        .status(HttpStatus.BAD_REQUEST)
         .body(new ErrorResponse(
                 "Bad Request",
                 "Malformed JSON in request body or invalid/non-existent id",
