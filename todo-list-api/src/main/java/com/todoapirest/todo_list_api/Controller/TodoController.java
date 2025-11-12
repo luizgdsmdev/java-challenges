@@ -1,5 +1,4 @@
 package com.todoapirest.todo_list_api.Controller;
-import com.todoapirest.todo_list_api.Entity.Todo;
 import com.todoapirest.todo_list_api.Exceptions.Records.ErrorResponse;
 import com.todoapirest.todo_list_api.Service.TodoService;
 import com.todoapirest.todo_list_api.TodoDataTransferObject.TodoCreateRequest;
@@ -10,8 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/todo")
