@@ -191,9 +191,9 @@ record TodoCreateRequest(
 ```java
 record TodoUpdateRequest(
     @NotNull @Min(1) Long id,
+    @NotNull @Size(min=3, max=60) String title,
     @NotNull Boolean completed,
     @Min(1) @Max(5) Integer priority,
-    String title,
     String description
 )
 ```
