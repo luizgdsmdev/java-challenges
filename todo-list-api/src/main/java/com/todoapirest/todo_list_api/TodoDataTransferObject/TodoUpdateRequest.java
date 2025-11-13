@@ -17,7 +17,7 @@ public record TodoUpdateRequest(
         @NotNull(message = "Completed field is required")
         boolean completed,
 
-        @Size( max = 400, message = "Description must be between 3 and 400 characters")
+        @Size( max = 400, message = "Description must be 400 characters maximum")
         String description,
 
         @Min(value = 1, message = "Priority field must be between 1 and 5")
