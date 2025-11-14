@@ -1,16 +1,42 @@
 package com.todoapirest.todo_list_api;
+import com.todoapirest.todo_list_api.Entity.Todo;
 import com.todoapirest.todo_list_api.TodoDataTransferObject.TodoCreateRequest;
+import com.todoapirest.todo_list_api.TodoDataTransferObject.TodoUpdateRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
+
+import java.net.URI;
+
 import static org.hamcrest.Matchers.matchesPattern;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class TodoListApiApplicationTests {
     @Autowired
     private WebTestClient webTestClient;
+    private Long createdTodoId;
+
+    @BeforeEach
+    void setup() {
+        TodoCreateRequest create = new TodoCreateRequest("Initial Title", false, "desc", 1);
+
+        URI location = webTestClient.post()
+                .uri("/todo")
+                .bodyValue(create)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().valueMatches("Location", ".*/\\d+")
+                .returnResult(Void.class)
+                .getResponseHeaders()
+                .getLocation();
+
+        this.createdTodoId = Long.parseLong(
+                location.getPath().substring(location.getPath().lastIndexOf("/") + 1)
+        );
+    }
 
     //-------------------------- creation tests: succeeds
     @DisplayName("POST: /todo -> (201 created) | Creation succeeds with valid data.")
@@ -172,6 +198,177 @@ class TodoListApiApplicationTests {
                         "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+"
                 ));
     }
+
+
+    //-------------------------- update tests: succeeds
+    @DisplayName("PUT: /todo -> (200 created) | Update succeeds with valid data.")
+    @Test
+    void shouldUpdateTodo_WhenValidData() {
+        TodoUpdateRequest update = new TodoUpdateRequest(
+                createdTodoId, "New title", true, "New desc", 4
+        );
+
+        webTestClient.put()
+                .uri("/todo")
+                .bodyValue(update)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(createdTodoId.intValue())
+                .jsonPath("$.description").isEqualTo("New desc")
+                .jsonPath("$.priority").isEqualTo(4)
+                .jsonPath("$.completed").isEqualTo(true)
+                .jsonPath("$.title").isEqualTo("New title");
+    }
+
+    @DisplayName("PUT: /todo -> (200 created) | Update succeeds with valid data, but empty description.")
+    @Test
+    void shouldUpdateTodo_WhenDescriptionIsEmpty() {
+        TodoUpdateRequest update = new TodoUpdateRequest(
+                createdTodoId, "New title", true, "", 4
+        );
+
+        webTestClient.put()
+                .uri("/todo")
+                .bodyValue(update)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(createdTodoId.intValue())
+                .jsonPath("$.description").isEqualTo("")
+                .jsonPath("$.priority").isEqualTo(4)
+                .jsonPath("$.completed").isEqualTo(true)
+                .jsonPath("$.title").isEqualTo("New title");
+    }
+
+
+    //-------------------------- update tests: failure
+    @DisplayName("POST: /todo -> (400 Bad Request) | Update fails when title value is greater than 60 characters.")
+    @Test
+    void updateFails_WhenTitleIsGreaterThan60Characters() {
+        TodoUpdateRequest update = new TodoUpdateRequest(
+                createdTodoId, "1234567890123456789012345678901234567890123456789012345678901234567890", true, "", 4
+        );
+        webTestClient
+                .post()
+                .uri("/todo")
+                .bodyValue(update)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Invalid data")
+                .jsonPath("$.details").isEqualTo("title: Title must be between 3 and 60 characters")
+                .jsonPath("$.timestamp").isNotEmpty()
+                .jsonPath("$.timestamp").value(matchesPattern(
+                        "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+"
+                ));
+    }
+
+    @DisplayName("POST: /todo -> (400 Bad Request) | Update fails when title value is lesser than 3 characters.")
+    @Test
+    void updateFails_WhenTitleIsLesserThan3Characters() {
+        TodoUpdateRequest update = new TodoUpdateRequest(
+                createdTodoId, "N", true, "", 4
+        );
+        webTestClient
+                .post()
+                .uri("/todo")
+                .bodyValue(update)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Invalid data")
+                .jsonPath("$.details").isEqualTo("title: Title must be between 3 and 60 characters")
+                .jsonPath("$.timestamp").isNotEmpty()
+                .jsonPath("$.timestamp").value(matchesPattern(
+                        "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+"
+                ));
+    }
+
+    @DisplayName("POST: /todo -> (400 Bad Request) | Update fails when title value is empty.")
+    @Test
+    void updateFails_WhenTitleIsEmpty() {
+        TodoUpdateRequest update = new TodoUpdateRequest(
+                createdTodoId, "", true, "", 4
+        );
+        webTestClient
+                .post()
+                .uri("/todo")
+                .bodyValue(update)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Invalid data")
+                .jsonPath("$.details").isEqualTo("title: Title must be between 3 and 60 characters")
+                .jsonPath("$.timestamp").isNotEmpty()
+                .jsonPath("$.timestamp").value(matchesPattern(
+                        "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+"
+                ));
+    }
+
+    @DisplayName("POST: /todo -> (400 Bad Request) | Update fails when description value is greater than 400 characters.")
+    @Test
+    void updateFails_WhenDescriptionIsGreaterThan400Characters() {
+        TodoUpdateRequest update = new TodoUpdateRequest(
+                createdTodoId, "New title", true, "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901", 4
+        );
+        webTestClient
+                .post()
+                .uri("/todo")
+                .bodyValue(update)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Invalid data")
+                .jsonPath("$.details").isEqualTo("description: Description must be 400 characters maximum")
+                .jsonPath("$.timestamp").isNotEmpty()
+                .jsonPath("$.timestamp").value(matchesPattern(
+                        "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+"
+                ));
+    }
+
+    @DisplayName("POST: /todo -> (400 Bad Request) | Update fails when priority value is greater than 5.")
+    @Test
+    void updateFails_WhenPriorityIsGreaterThan5() {
+        TodoUpdateRequest update = new TodoUpdateRequest(
+                createdTodoId, "New title", true, "", 6
+        );
+        webTestClient
+                .post()
+                .uri("/todo")
+                .bodyValue(update)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Invalid data")
+                .jsonPath("$.details").isEqualTo("priority: Priority field must be between 1 and 5")
+                .jsonPath("$.timestamp").isNotEmpty()
+                .jsonPath("$.timestamp").value(matchesPattern(
+                        "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+"
+                ));
+    }
+
+    @DisplayName("POST: /todo -> (400 Bad Request) | Update fails when priority value is lesser than 1.")
+    @Test
+    void updateFails_WhenPriorityIsLesserThan1() {
+        TodoUpdateRequest update = new TodoUpdateRequest(
+                createdTodoId, "New title", true, "", 0
+        );
+        webTestClient
+                .post()
+                .uri("/todo")
+                .bodyValue(update)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Invalid data")
+                .jsonPath("$.details").isEqualTo("priority: Priority field must be between 1 and 5")
+                .jsonPath("$.timestamp").isNotEmpty()
+                .jsonPath("$.timestamp").value(matchesPattern(
+                        "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+"
+                ));
+    }
+
 
 
 
