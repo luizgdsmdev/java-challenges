@@ -201,7 +201,7 @@ class TodoListApiApplicationTests {
 
 
     //-------------------------- update tests: succeeds
-    @DisplayName("PUT: /todo -> (200 created) | Update succeeds with valid data.")
+    @DisplayName("PUT: /todo -> (200 ok) | Update succeeds with valid data.")
     @Test
     void shouldUpdateTodo_WhenValidData() {
         TodoUpdateRequest update = new TodoUpdateRequest(
@@ -221,7 +221,7 @@ class TodoListApiApplicationTests {
                 .jsonPath("$.title").isEqualTo("New title");
     }
 
-    @DisplayName("PUT: /todo -> (200 created) | Update succeeds with valid data, but empty description.")
+    @DisplayName("PUT: /todo -> (200 ok) | Update succeeds with valid data, but empty description.")
     @Test
     void shouldUpdateTodo_WhenDescriptionIsEmpty() {
         TodoUpdateRequest update = new TodoUpdateRequest(
@@ -243,7 +243,7 @@ class TodoListApiApplicationTests {
 
 
     //-------------------------- update tests: failure
-    @DisplayName("POST: /todo -> (400 Bad Request) | Update fails when title value is greater than 60 characters.")
+    @DisplayName("PUT: /todo -> (400 Bad Request) | Update fails when title value is greater than 60 characters.")
     @Test
     void updateFails_WhenTitleIsGreaterThan60Characters() {
         TodoUpdateRequest update = new TodoUpdateRequest(
@@ -264,7 +264,7 @@ class TodoListApiApplicationTests {
                 ));
     }
 
-    @DisplayName("POST: /todo -> (400 Bad Request) | Update fails when title value is lesser than 3 characters.")
+    @DisplayName("PUT: /todo -> (400 Bad Request) | Update fails when title value is lesser than 3 characters.")
     @Test
     void updateFails_WhenTitleIsLesserThan3Characters() {
         TodoUpdateRequest update = new TodoUpdateRequest(
@@ -285,7 +285,7 @@ class TodoListApiApplicationTests {
                 ));
     }
 
-    @DisplayName("POST: /todo -> (400 Bad Request) | Update fails when title value is empty.")
+    @DisplayName("PUT: /todo -> (400 Bad Request) | Update fails when title value is empty.")
     @Test
     void updateFails_WhenTitleIsEmpty() {
         TodoUpdateRequest update = new TodoUpdateRequest(
@@ -306,7 +306,7 @@ class TodoListApiApplicationTests {
                 ));
     }
 
-    @DisplayName("POST: /todo -> (400 Bad Request) | Update fails when description value is greater than 400 characters.")
+    @DisplayName("PUT: /todo -> (400 Bad Request) | Update fails when description value is greater than 400 characters.")
     @Test
     void updateFails_WhenDescriptionIsGreaterThan400Characters() {
         TodoUpdateRequest update = new TodoUpdateRequest(
@@ -327,7 +327,7 @@ class TodoListApiApplicationTests {
                 ));
     }
 
-    @DisplayName("POST: /todo -> (400 Bad Request) | Update fails when priority value is greater than 5.")
+    @DisplayName("PUT: /todo -> (400 Bad Request) | Update fails when priority value is greater than 5.")
     @Test
     void updateFails_WhenPriorityIsGreaterThan5() {
         TodoUpdateRequest update = new TodoUpdateRequest(
@@ -348,7 +348,7 @@ class TodoListApiApplicationTests {
                 ));
     }
 
-    @DisplayName("POST: /todo -> (400 Bad Request) | Update fails when priority value is lesser than 1.")
+    @DisplayName("PUT: /todo -> (400 Bad Request) | Update fails when priority value is lesser than 1.")
     @Test
     void updateFails_WhenPriorityIsLesserThan1() {
         TodoUpdateRequest update = new TodoUpdateRequest(
@@ -363,6 +363,79 @@ class TodoListApiApplicationTests {
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Invalid data")
                 .jsonPath("$.details").isEqualTo("priority: Priority field must be between 1 and 5")
+                .jsonPath("$.timestamp").isNotEmpty()
+                .jsonPath("$.timestamp").value(matchesPattern(
+                        "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+"
+                ));
+    }
+
+
+
+    //-------------------------- get tests: succeeds
+    @DisplayName("GET: /todo -> (200 ok) | get succeeds with valid ID.")
+    @Test
+    void shouldGetTodo_WhenValidId() {
+
+        webTestClient.get()
+                .uri("/todo/" + createdTodoId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(createdTodoId.intValue())
+                .jsonPath("$.title").isEqualTo("Initial Title")
+                .jsonPath("$.description").isEqualTo("desc")
+                .jsonPath("$.priority").isEqualTo(1)
+                .jsonPath("$.completed").isEqualTo(false);
+    }
+
+    //-------------------------- get tests: failure
+    @DisplayName("GET: /todo -> (404 Not Found) | get Not Found with invalid ID.")
+    @Test
+    void getFails_WhenInvalidId() {
+
+        webTestClient.get()
+                .uri("/todo/" + 0)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Bad Request")
+                .jsonPath("$.details").isEqualTo("Invalid or non-existent id")
+                .jsonPath("$.timestamp").isNotEmpty()
+                .jsonPath("$.timestamp").value(matchesPattern(
+                        "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+"
+                ));
+    }
+
+
+    //-------------------------- Delete tests: succeeds
+    @DisplayName("DELETE: /todo -> (202 Accepted) | Delete succeeds with valid ID.")
+    @Test
+    void shouldDeleteTodo_WhenValidId() {
+
+        webTestClient.delete()
+                .uri("/todo/" + createdTodoId)
+                .exchange()
+                .expectStatus().isAccepted()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(createdTodoId.intValue())
+                .jsonPath("$.title").isEqualTo("Initial Title")
+                .jsonPath("$.description").isEqualTo("desc")
+                .jsonPath("$.priority").isEqualTo(1)
+                .jsonPath("$.completed").isEqualTo(false);
+    }
+
+    //-------------------------- Delete tests: failure
+    @DisplayName("DELETE: /todo -> (400 Bad Request) | Delete fails with invalid ID.")
+    @Test
+    void deleteFails_WhenInvalidId() {
+
+        webTestClient.delete()
+                .uri("/todo/" + 0)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Bad Request")
+                .jsonPath("$.details").isEqualTo("Invalid or non-existent id")
                 .jsonPath("$.timestamp").isNotEmpty()
                 .jsonPath("$.timestamp").value(matchesPattern(
                         "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+"

@@ -51,8 +51,7 @@ public class TodoController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Object> getAll(
-             Pageable pageable) {
+    public ResponseEntity<Object> getAll(Pageable pageable) {
         return todoService.listAllTodos(pageable)
         .map(todoList -> ResponseEntity.status(HttpStatus.OK).body((Object) todoList))
         .orElseGet(() -> ResponseEntity
