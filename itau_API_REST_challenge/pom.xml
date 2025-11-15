@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.itau.bank.backend</groupId>
-	<artifactId>itau_API_REST_challenge</artifactId>
+	<artifactId>itau_REST_API_challenge</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Spring_Boot_API_REST_challenge</name>
 	<description>Demo project for Spring Boot/API REST from a backend challenge</description>
