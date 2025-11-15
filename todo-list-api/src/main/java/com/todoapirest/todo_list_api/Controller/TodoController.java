@@ -4,6 +4,9 @@ import com.todoapirest.todo_list_api.Service.TodoService;
 import com.todoapirest.todo_list_api.TodoDataTransferObject.TodoCreateRequest;
 import com.todoapirest.todo_list_api.TodoDataTransferObject.TodoUpdateRequest;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,8 +51,9 @@ public class TodoController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Object> getAll() {
-        return todoService.listAllTodos()
+    public ResponseEntity<Object> getAll(
+             Pageable pageable) {
+        return todoService.listAllTodos(pageable)
         .map(todoList -> ResponseEntity.status(HttpStatus.OK).body((Object) todoList))
         .orElseGet(() -> ResponseEntity
         .status(HttpStatus.UNPROCESSABLE_ENTITY)

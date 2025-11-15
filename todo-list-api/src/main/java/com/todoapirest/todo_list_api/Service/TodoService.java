@@ -5,6 +5,8 @@ import com.todoapirest.todo_list_api.Repository.TodoRepository;
 import com.todoapirest.todo_list_api.TodoDataTransferObject.TodoCreateRequest;
 import com.todoapirest.todo_list_api.TodoDataTransferObject.TodoUpdateRequest;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -54,9 +56,9 @@ public class TodoService {
         }
     }
 
-    public Optional<List<Todo>> listAllTodos(){
+    public Optional<Page<Todo>> listAllTodos(Pageable pageable){
         try{
-            return Optional.of(todoRepository.findAll());
+            return Optional.of(todoRepository.findAll(pageable));
         } catch (Exception ex) {
             throw new RuntimeException("Error for toDo listing on listAllTodos() method.", ex);
         }
