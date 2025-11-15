@@ -1,23 +1,49 @@
 package com.todoapirest.todo_list_api;
 import com.todoapirest.todo_list_api.Entity.Todo;
+import com.todoapirest.todo_list_api.Repository.TodoRepository;
 import com.todoapirest.todo_list_api.TodoDataTransferObject.TodoCreateRequest;
 import com.todoapirest.todo_list_api.TodoDataTransferObject.TodoUpdateRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.env.Environment;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
-
 import java.net.URI;
+import java.util.Arrays;
 
 import static org.hamcrest.Matchers.matchesPattern;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureWebTestClient
+@ActiveProfiles("test")
 class TodoListApiApplicationTests {
     @Autowired
     private WebTestClient webTestClient;
     private Long createdTodoId;
+
+    @Autowired
+    private TodoRepository todoRepository;
+
+    @Autowired
+    private Environment env;
+
+    @Test
+    void debugProfile() {
+        System.out.println("=== PERFIS ATIVOS ===");
+        Arrays.stream(env.getActiveProfiles()).forEach(p -> System.out.println("→ " + p));
+
+        System.out.println("=== DATABASE URL ===");
+        System.out.println(env.getProperty("spring.datasource.url"));
+    }
+
+    @BeforeEach
+    void setUp() {
+        todoRepository.deleteAll();
+    }
 
     @BeforeEach
     void setup() {
@@ -440,6 +466,43 @@ class TodoListApiApplicationTests {
                 .jsonPath("$.timestamp").value(matchesPattern(
                         "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+"
                 ));
+    }
+
+
+    //-------------------------- Get All tests: succeeds
+    @DisplayName("GET: /all -> (200 OK) | retorna página com dados reais e metadados de paginação")
+    @Test
+    void shouldReturnPaginatedTodos_WithRealData() {
+        for (int i = 1; i <= 25; i++) {
+            Todo t = new Todo();
+            t.setTitle("Tarefa " + i);
+            t.setDescription("Desc " + i);
+            t.setPriority(i % 5);
+            t.setCompleted(false);
+            todoRepository.save(t);
+        }
+
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("todo/all")
+                        .queryParam("page", "0")
+                        .queryParam("size", "10")
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.content").isArray()
+                .jsonPath("$.content.length()").isEqualTo(10)
+                .jsonPath("$.content[0].title").isNotEmpty()
+                .jsonPath("$.content[9].title").isNotEmpty()
+                .jsonPath("$.pageable.pageNumber").isEqualTo(0)
+                .jsonPath("$.pageable.pageSize").isEqualTo(10)
+                .jsonPath("$.totalElements").isEqualTo(26)
+                .jsonPath("$.totalPages").isEqualTo(3)
+                .jsonPath("$.first").isEqualTo(true)
+                .jsonPath("$.last").isEqualTo(false)
+                .jsonPath("$.numberOfElements").isEqualTo(10);
     }
 
 
