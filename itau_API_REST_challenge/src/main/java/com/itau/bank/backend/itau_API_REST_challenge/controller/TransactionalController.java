@@ -1,11 +1,9 @@
 package com.itau.bank.backend.itau_API_REST_challenge.controller;
-
-import com.itau.bank.backend.itau_API_REST_challenge.dto.TransationalRequest;
+import com.itau.bank.backend.itau_API_REST_challenge.dto.TransactionalRequest;
 import com.itau.bank.backend.itau_API_REST_challenge.model.Transaction;
 import com.itau.bank.backend.itau_API_REST_challenge.service.TransactionalService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,15 +21,15 @@ public class TransactionalController {
 
 
     @PostMapping
-    public ResponseEntity<Void> createTransaction(@RequestBody @Valid TransationalRequest requestBody){
+    public ResponseEntity<Void> createTransaction(@RequestBody @Valid TransactionalRequest requestBody){
         //Todo: adjust the response for invalid arguments (current being handled by the DTO with return 400 BAD_REQUEST
         //Should return also 422 unprocessableEntity
 
-        if(requestBody.getDateHour().isAfter(OffsetDateTime.now())){
+        if(requestBody.getDataHora().isAfter(OffsetDateTime.now())){
             return ResponseEntity.unprocessableEntity().build();
         }
 
-        transactionalService.addTransaction(new Transaction(requestBody.getValue(),requestBody.getDateHour()));
+        transactionalService.addTransaction(new Transaction(requestBody.getValor(), requestBody.getDataHora()));
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

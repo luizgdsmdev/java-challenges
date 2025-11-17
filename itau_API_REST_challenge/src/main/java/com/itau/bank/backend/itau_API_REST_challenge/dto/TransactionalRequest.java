@@ -1,16 +1,16 @@
-package com.itau.bank.backend.itau_API_REST_challenge.model;
+package com.itau.bank.backend.itau_API_REST_challenge.dto;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
 import java.time.OffsetDateTime;
 
-public class Transaction {
+public class TransactionalRequest {
+    @NotNull
+    @Min(0)
     private double valor;
+
+    @NotNull(message = "dataHora não deve ser nulo")
     private OffsetDateTime dataHora;
-
-    public Transaction() {}
-
-    public Transaction(double valor, OffsetDateTime dataHora) {
-        this.valor = valor;
-        this.dataHora = dataHora;
-    }
 
     public double getValor() {
         return valor;

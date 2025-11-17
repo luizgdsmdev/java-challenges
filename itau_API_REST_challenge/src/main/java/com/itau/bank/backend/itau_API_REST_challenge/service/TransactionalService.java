@@ -25,11 +25,11 @@ public class TransactionalService {
     public DoubleSummaryStatistics getStatistics(){
         OffsetDateTime currentDate = OffsetDateTime.now();
         return transactionsDB.stream()
-//                .filter(transaction ->
-//                                transaction.getDateHour()
-//                                .isAfter(currentDate
-//                                .minusSeconds(60)))
-                .mapToDouble(Transaction::getValue)
+                .filter(transaction ->
+                                transaction.getDataHora()
+                                .isAfter(currentDate
+                                .minusSeconds(60)))
+                .mapToDouble(Transaction::getValor)
                 .summaryStatistics();
     }
 
