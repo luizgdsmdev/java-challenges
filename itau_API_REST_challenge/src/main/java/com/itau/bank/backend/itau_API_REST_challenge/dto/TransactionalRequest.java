@@ -5,11 +5,11 @@ import jakarta.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
 
 public class TransactionalRequest {
-    @NotNull
+    @NotNull(message = "valor can't be empty or lesser than 0.")
     @Min(0)
     private double valor;
 
-    @NotNull(message = "dataHora não deve ser nulo")
+    @NotNull(message = "dataHora can't be empty.")
     private OffsetDateTime dataHora;
 
     public double getValor() {

@@ -16,6 +16,7 @@ public class TransactionalService {
 
 
     public Optional<Boolean> addTransaction(Transaction transaction){
+        System.out.println(OffsetDateTime.now());
             try{
                 return Optional.of(transactionsDB.add(transaction));
             } catch (Exception e) {
