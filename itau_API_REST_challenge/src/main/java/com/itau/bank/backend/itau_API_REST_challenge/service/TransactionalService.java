@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.DoubleSummaryStatistics;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -14,8 +15,12 @@ public class TransactionalService {
     private final Queue<Transaction> transactionsDB = new ConcurrentLinkedQueue<>();
 
 
-    public void addTransaction(Transaction transaction){
-        transactionsDB.add(transaction);
+    public Optional<Boolean> addTransaction(Transaction transaction){
+            try{
+                return Optional.of(transactionsDB.add(transaction));
+            } catch (Exception e) {
+                throw new RuntimeException("Error for adding a new transaction on addTransaction() method.", e);
+            }
     }
 
     public void clearTransactions(){

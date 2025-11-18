@@ -25,18 +25,24 @@ public class TransactionalController {
         //Todo: adjust the response for invalid arguments (current being handled by the DTO with return 400 BAD_REQUEST
         //Should return also 422 unprocessableEntity
 
-        if(requestBody.getDataHora().isAfter(OffsetDateTime.now())){
-            return ResponseEntity.unprocessableEntity().build();
-        }
+        validateRequestBodyDataHora(requestBody);
 
         transactionalService.addTransaction(new Transaction(requestBody.getValor(), requestBody.getDataHora()));
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
 
     @DeleteMapping
     public ResponseEntity<Void> deleteTransactions(){
 
         transactionalService.clearTransactions();
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+
+    private ResponseEntity<Void> validateRequestBodyDataHora(@Valid TransactionalRequest requestBody) {
+        if(requestBody.getDataHora().isAfter(OffsetDateTime.now())){
+            return ResponseEntity.unprocessableEntity().build();
+        }
     }
 }
