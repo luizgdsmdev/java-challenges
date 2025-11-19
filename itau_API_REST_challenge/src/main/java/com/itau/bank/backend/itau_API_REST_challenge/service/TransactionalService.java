@@ -31,15 +31,15 @@ public class TransactionalService {
         }
     }
 
-    public DoubleSummaryStatistics getStatistics(){
+    public Optional<DoubleSummaryStatistics> getStatistics(){
         OffsetDateTime currentDate = OffsetDateTime.now();
-        return transactionsDB.stream()
+        return Optional.ofNullable(transactionsDB.stream()
                 .filter(transaction ->
-                                transaction.getDataHora()
+                        transaction.getDataHora()
                                 .isAfter(currentDate
-                                .minusSeconds(60)))
+                                        .minusSeconds(60)))
                 .mapToDouble(Transaction::getValor)
-                .summaryStatistics();
+                .summaryStatistics());
     }
 
 

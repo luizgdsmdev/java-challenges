@@ -51,9 +51,9 @@ public class TransactionalController {
         }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(
                     new ErrorResponse(
-                            "Service unavailable",
-                            "Something went wrong with your request for deletion, please try again later.",
-                            LocalDateTime.now()
+                        "Service unavailable",
+                        "Something went wrong with your request for deletion, please try again later.",
+                        LocalDateTime.now()
                     )
             );
 
