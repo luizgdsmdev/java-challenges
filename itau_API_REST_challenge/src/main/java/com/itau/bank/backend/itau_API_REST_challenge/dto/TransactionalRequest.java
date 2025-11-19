@@ -27,4 +27,6 @@ public class TransactionalRequest {
     public void setDataHora(OffsetDateTime dataHora) {
         this.dataHora = dataHora;
     }
+
+    public TransactionalRequest() {}
 }

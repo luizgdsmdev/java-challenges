@@ -2,9 +2,11 @@ package com.itau.bank.backend.itau_API_REST_challenge.utils.validations;
 import com.itau.bank.backend.itau_API_REST_challenge.dto.TransactionalRequest;
 import com.itau.bank.backend.itau_API_REST_challenge.exceptions.BusinessException;
 import jakarta.validation.Valid;
+import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 
+@Component
 public class TransactionalControllerValidations {
 
     public void validateRequestBodyDataHora(@Valid TransactionalRequest requestBody) {
