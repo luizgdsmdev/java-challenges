@@ -1,7 +1,6 @@
 package com.itau.bank.backend.itau_API_REST_challenge.service;
 import com.itau.bank.backend.itau_API_REST_challenge.model.Transaction;
 import org.springframework.stereotype.Service;
-
 import java.time.OffsetDateTime;
 import java.util.DoubleSummaryStatistics;
 import java.util.Optional;
