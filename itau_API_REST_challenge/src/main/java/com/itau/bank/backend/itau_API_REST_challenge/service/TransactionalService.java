@@ -24,7 +24,11 @@ public class TransactionalService {
     }
 
     public void clearTransactions(){
-        transactionsDB.clear();
+        try{
+            transactionsDB.clear();
+        } catch (Exception e) {
+            throw new RuntimeException("Error for deleting transactions on clearTransactions() method.", e);
+        }
     }
 
     public DoubleSummaryStatistics getStatistics(){

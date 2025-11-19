@@ -43,9 +43,21 @@ public class TransactionalController {
 
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteTransactions(){
+    public ResponseEntity<Object> deleteTransactions(){
 
-        transactionalService.clearTransactions();
-        return ResponseEntity.status(HttpStatus.OK).build();
+        try{
+            transactionalService.clearTransactions();
+            return ResponseEntity.status(HttpStatus.OK).build();
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(
+                    new ErrorResponse(
+                            "Service unavailable",
+                            "Something went wrong with your request for deletion, please try again later.",
+                            LocalDateTime.now()
+                    )
+            );
+
+        }
+
     }
 }
