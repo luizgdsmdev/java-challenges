@@ -44,9 +44,9 @@ class ItauApiRestChallengeTests {
         ResponseEntity<String> response = restTemplate.postForEntity("/transacao", request, String.class);
         String body = response.getBody();
 
-        assertThat(body).contains("\"message\":\"Invalid data\"");
-        assertThat(body).contains("\"details\":\"valor: deve ser maior que ou igual à 0\"");
         assertThat(body)
+        .contains("\"message\":\"Invalid data\"")
+        .contains("\"details\":\"valor: deve ser maior que ou igual à 0\"")
         .contains("\"timestamp\":\"")
         .matches(".*\"timestamp\":\"\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?([+-]\\d{2}:\\d{2}|Z)?\".*");
     }
@@ -68,12 +68,54 @@ class ItauApiRestChallengeTests {
         .toOffsetDateTime()
         .toString();
 
-        assertThat(body).contains("\"message\":\"Unprocessable Entity\"");
-        assertThat(body).contains("\"details\":\"dataHora field can't be in future time: " + dataHoraAdjust + "\"");
         assertThat(body)
+        .contains("\"message\":\"Unprocessable Entity\"")
+        .contains("\"details\":\"dataHora field can't be in future time: " + dataHoraAdjust + "\"")
         .contains("\"timestamp\":\"")
         .matches(".*\"timestamp\":\"\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?([+-]\\d{2}:\\d{2}|Z)?\".*");
     }
+
+
+    //-------------------------- Statistics call: succeeds
+    @DisplayName("GET: /estatistica -> (200 Ok) | Statistics call succeeds without data (mock for empty database).")
+    @Test
+    void shouldReturnStatistics_WhenValidData() {
+        ResponseEntity<String> response = restTemplate.getForEntity("/estatistica", String.class);
+        String body = response.getBody();
+
+        assertThat(body)
+        .contains("\"count\":0")
+        .contains("\"sum\":0.0")
+        .contains("\"min\":\"Infinity\"")
+        .contains("\"max\":\"-Infinity\"")
+        .contains("\"average\":0.0");
+    }
+
+    @DisplayName("GET: /estatistica -> (200 Ok) | Statistics call succeeds with data (mock database).")
+    @Test
+    void shouldReturnStatistics_WhenValidDataMock() {
+        for(int i = 0; i < 10; i++){
+            TransactionalRequest request = new TransactionalRequest();
+            request.setDataHora(OffsetDateTime.now().minusSeconds(10));
+            request.setValor((double) 5 * i);
+
+            restTemplate.postForEntity("/transacao", request, Void.class);
+        }
+
+
+        ResponseEntity<String> response = restTemplate.getForEntity("/estatistica", String.class);
+        String body = response.getBody();
+
+        assertThat(body)
+                .contains("\"count\":10")
+                .contains("\"sum\":225.0")
+                .contains("\"min\":0.0")
+                .contains("\"max\":45.0")
+                .contains("\"average\":22.5");
+    }
+
+
+
 
 
 }
